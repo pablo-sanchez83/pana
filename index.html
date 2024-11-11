@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Contenido</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Cuadro de diálogo centrado para cargar archivo -->
+    <div id="dialogoCarga" class="dialogo-carga">
+        <h1>Sube el fichero recientemente generado</h1>
+        <input type="file" accept=".json" id="fileInput">
+    </div>
+
+    <!-- Contenedor de frases -->
+    <div class="contenedor">Cargando contenido...</div>
+    <img id="botonMostrar" src="dice-fire.svg" alt="icono dado" style="display: none;">
+
+    <script>
+        const contenedor = document.querySelector('.contenedor');
+        const boton = document.getElementById('botonMostrar');
+        const fileInput = document.getElementById('fileInput');
+        const dialogoCarga = document.getElementById('dialogoCarga');
+        let entries = [];
+        let currentIndex = 0;
+
+        // Solicitar el archivo JSON al cargar la página
+        document.addEventListener("DOMContentLoaded", () => {
+            dialogoCarga.style.display = 'flex';
+        });
+
+        // Procesar el archivo JSON cargado
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        entries = JSON.parse(e.target.result);
+                        if (entries.length > 0) {
+                            mostrarEntrada(currentIndex);
+                            boton.style.display = "block"; // Mostrar botón una vez que se cargan datos
+                            dialogoCarga.style.display = 'none'; // Ocultar el diálogo de carga
+                        } else {
+                            contenedor.innerHTML = "El archivo está vacío.";
+                        }
+                    } catch (error) {
+                        alert("Error al cargar el archivo. Asegúrate de que sea un JSON válido.");
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                contenedor.innerHTML = "No se seleccionó ningún archivo.";
+            }
+        });
+
+        // Mostrar una entrada en formato estilado con animación
+        boton.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % entries.length;
+            mostrarEntrada(currentIndex);
+        });
+
+        function mostrarEntrada(index) {
+            const entry = entries[index];
+            contenedor.classList.add('animacion-salida');
+            
+            setTimeout(() => {
+                contenedor.innerHTML = `
+                    <div class="card">
+                        <h2>${entry.title}</h2>
+                        <h4>${entry.subtitle}</h4>
+                        <p>${entry.content}</p>
+                    </div>
+                `;
+                contenedor.classList.remove('animacion-salida');
+                contenedor.classList.add('animacion-entrada');
+                
+                setTimeout(() => {
+                    contenedor.classList.remove('animacion-entrada');
+                }, 500);
+            }, 500);
+        }
+    </script>
+</body>
+</html>
